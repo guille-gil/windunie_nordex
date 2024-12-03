@@ -1,0 +1,1 @@
+# Script for Lambda function to retrieve data.

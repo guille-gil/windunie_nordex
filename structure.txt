@@ -1,0 +1,35 @@
+project-name/
+│
+├── data/
+│   ├── raw/                 # Store raw, unprocessed data (e.g., vibration data from turbines).
+│   ├── processed/           # Store processed or cleaned data for analysis.
+│   ├── results/             # Store model outputs, reports, or performance metrics.
+│
+├── models/
+│   ├── changepoint/         # Implementation of changepoint detection models.
+│   ├── evaluation/          # Scripts to evaluate and compare model performance.
+│
+├── notebooks/               # Jupyter notebooks for exploration and visualization.
+│   └── eda.ipynb            # Exploratory data analysis and initial visualizations.
+│
+├── scripts/
+│   ├── data_retrieval.py    # Script for Lambda function to retrieve data.
+│   ├── preprocess.py        # Script for cleaning and preprocessing raw data.
+│   ├── detect_cp.py         # Script for running changepoint detection models.
+│   ├── generate_report.py   # Script to create automated reports.
+│
+├── utils/
+│   ├── s3_helpers.py        # Functions to upload, download, and manage S3 objects.
+│   ├── evaluation.py        # Utility functions for model performance metrics.
+│   ├── visualization.py     # Utility functions for generating plots and charts.
+│
+├── .github/
+│   ├── workflows/           # CI/CD workflows (e.g., automated tests or deployments).
+│
+├── .gitignore               # Specify files and folders to ignore in version control.
+├── README.md                # Overview of the project, setup instructions, and usage.
+├── requirements.txt         # List of Python dependencies for the project.
+├── setup.py                 # For packaging the project (optional, for libraries or modules).
+├── LICENSE                  # The chosen license for your project.
+├── main.py                  # Entry point script for running the pipeline.
+└── thesis.tex               # Your LaTeX file for the thesis (if writing in LaTeX).
