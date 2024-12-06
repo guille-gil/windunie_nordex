@@ -177,7 +177,9 @@ class CMSCrawler:
 
     @staticmethod
     def parse_file_as_dataframe(file_path, group_name, asset_name):
-        """ Parse the server file response as a dataframe with vibration filtering and component tagging """
+        """ parse the server file response as a dataframe """
+        # NOTE: feel free to addapt/improve this function
+
         with open(file_path, 'r') as file:
             content = file.read()
 
@@ -186,22 +188,17 @@ class CMSCrawler:
 
         data = []
         for i in range(0, len(sections), 4):
-            metadata_section = sections[i + 1] if i + 1 < len(sections) else ""
+            section_content = sections[i + 1] if i + 1 < len(sections) else ""
 
             # Extract metadata
             metadata = {}
-            for line in metadata_section.split('\n'):
+            for line in section_content.split('\n'):
                 if '=' in line:
                     key, value = line.split('=', 1)
                     metadata[key.strip()] = value.strip()
 
-            # Filter for vibration data
-            if metadata.get('MeasUnit') != 'g':  # Only include vibration data
-                continue
-
-            # Extract tag_name (sensor) and component
+            # Extract tag_name (sensor)
             tag_name = metadata.get('szLabel', 'Unknown')
-            component = metadata.get('szComponent', 'Unknown')  # Tag component
 
             # Parse the data
             data_section = sections[i + 3] if i + 3 < len(sections) else ""
@@ -213,8 +210,8 @@ class CMSCrawler:
                     parts = line.split('\t')
                     if len(parts) >= 2:
                         timestamp, value = parts[:2]
-                        rows.append([float(timestamp), float(value), component])  # Add component to data
-                df = pd.DataFrame(rows, columns=['timestamp', 'value', 'component'])
+                        rows.append([float(timestamp), float(value)])
+                df = pd.DataFrame(rows, columns=['timestamp', 'value'])
 
                 df['tag_name'] = tag_name
                 df['group_name'] = group_name
@@ -281,9 +278,6 @@ class CMSCrawler:
 
 
 def main(start, end):
-    # Start timer
-    start_time = time.time()
-
     crawler = CMSCrawler()
     raw_systems_data = crawler.get_systems()
 
@@ -297,22 +291,9 @@ def main(start, end):
 
     print(systems_data)
 
-    # List of device_ids for DenTol and Bommelerwaard
-    selected_device_ids = ['7592']
-    # '7591', '7592', '7625', '8146', '7665', '7930', '8147', '8511', '8148', '7574', '7873'
-
     dataframes = []
-
     for system_name, devices in systems_data.items():
         for device_id, device_name in devices:
-            # Filter by device_id
-            if device_id not in selected_device_ids:
-                continue
-
-            # Print to check the device_id being processed
-            print(f"Processing device ID: {device_id} - Device Name: {device_name}")
-
-            # Fetch raw files data for the device if it's in the filtered list
             raw_files_data = crawler.get_device_files({'id': device_id}, start, end)
             if not raw_files_data:
                 continue
@@ -324,19 +305,12 @@ def main(start, end):
                 if not df.empty:
                     dataframes.append(df)
 
-        # End timer
-        end_time = time.time()
-
-        # Calculate and print the total runtime
-        runtime = end_time - start_time
-        print(f"Total execution time: {runtime:.2f} seconds")
-
     return dataframes
 
 
 if __name__ == "__main__":
     start = datetime(2024, 11, 30, 0, 0)
-    end = datetime(2024, 11, 30, 2, 0)
+    end = datetime(2024, 11, 30, 3, 0)
 
     """ end = datetime.now()
     start = end - datetime.timedelta(days=1) """
@@ -344,10 +318,3 @@ if __name__ == "__main__":
     dataframes = main(start, end)
 
     print(dataframes)
-
-    # Combine all DataFrames into one
-    combined_df = pd.concat(dataframes, ignore_index=True)
-
-    # Save the combined DataFrame to a CSV file
-    combined_df.to_csv("dataframes.csv", index=False)
-    print("Data has been saved to 'dataframes.csv'")
